@@ -16,11 +16,11 @@ The LLM generates structured candidate detection logic that can then be reviewed
 
 - **Kali Linux** - Attack simulation and automation
 - **Windows Server** - Active Directory Domain Controller
-- **Windows** — Domain-joined endpoint
-- **Ubuntu Server** — Splunk Enterprise
-- **Windows 11 Host** — Ollama / Local LLM
-- **Python** — Security automation and API orchestration
-- **GitHub** — Detection version control and CI/CD
+- **Windows** - Domain joined endpoint
+- **Ubuntu Server** - Splunk Enterprise
+- **Windows 11 Host** - Ollama / Local LLM
+- **Python** - Security automation and API orchestration
+- **GitHub** - Detection version control and CI/CD
 
 ## Planned Detection Pipeline
 
@@ -50,7 +50,7 @@ Attack Replay & Validation
 
 ## Project Goals
 
-- Build a Python-based security automation pipeline
+- Build a Python based security automation pipeline
 - Integrate Splunk telemetry through REST APIs
 - Integrate a locally hosted LLM through the Ollama API
 - Apply data minimization before LLM inference
