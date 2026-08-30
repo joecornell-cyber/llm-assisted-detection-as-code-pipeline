@@ -1,0 +1,27 @@
+index=windows sourcetype="XmlWinEventLog:Security"
+| rex field=_raw "<EventID>(?<EventCode>\d+)</EventID>"
+| rex field=_raw "<Data Name='TargetUserName'>(?<TargetUserName>[^<]*)</Data>"
+| rex field=_raw "<Data Name='LogonType'>(?<LogonType>[^<]*)</Data>"
+| rex field=_raw "<Data Name='IpAddress'>(?<IpAddress>[^<]*)</Data>"
+| rex field=_raw "<Data Name='Status'>(?<Status>[^<]*)</Data>"
+| rex field=_raw "<Data Name='SubStatus'>(?<SubStatus>[^<]*)</Data>"
+| rex field=_raw "<Data Name='AuthenticationPackageName'>(?<AuthenticationPackageName>[^<]*)</Data>"
+| where EventCode="4625"
+| where IpAddress!="-" AND IpAddress!="127.0.0.1" AND IpAddress!="::1"
+| bin _time span=5m
+| stats
+    count as failed_logons
+    dc(TargetUserName) as distinct_users
+    values(TargetUserName) as targeted_users
+    values(LogonType) as logon_types
+    values(Status) as statuses
+    values(SubStatus) as substatuses
+    values(AuthenticationPackageName) as auth_packages
+    by _time host IpAddress
+| where failed_logons >= 10
+| eval attack_pattern=case(
+    distinct_users >= 3, "multi-account guessing / spray-like",
+    failed_logons >= 50, "high-volume brute force",
+    true(), "repeated failed authentication"
+)
+| sort - failed_logons

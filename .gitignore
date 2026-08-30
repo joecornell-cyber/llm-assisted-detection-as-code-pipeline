@@ -216,3 +216,25 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Lab-generated output
+output/
+
+# Temporary attack artifacts
+*.restore
+*.out
+
+# Local wordlists / test account files
+common_passwords.txt
+test_users.txt
+
+# Secrets
+secrets.txt
+*.token
+
+# Editor metadata
+.vscode/
+.idea/
+
+# OS metadata
+.DS_Store

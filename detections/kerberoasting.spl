@@ -1,0 +1,20 @@
+index=windows sourcetype="XmlWinEventLog:Security"
+| rex field=_raw "<EventID>(?<EventCode>\d+)</EventID>"
+| rex field=_raw "<Data Name='TargetUserName'>(?<TargetUserName>[^<]*)</Data>"
+| rex field=_raw "<Data Name='TargetDomainName'>(?<TargetDomainName>[^<]*)</Data>"
+| rex field=_raw "<Data Name='ServiceName'>(?<ServiceName>[^<]*)</Data>"
+| rex field=_raw "<Data Name='TicketEncryptionType'>(?<TicketEncryptionType>[^<]*)</Data>"
+| rex field=_raw "<Data Name='IpAddress'>(?<IpAddress>[^<]*)</Data>"
+| where EventCode="4769"
+| where NOT match(TargetUserName, "\\$$")
+| where NOT match(ServiceName, "\\$$")
+| where ServiceName!="-"
+| bin _time span=10m
+| stats
+    count as ticket_requests
+    dc(ServiceName) as distinct_services
+    values(ServiceName) as requested_services
+    values(TicketEncryptionType) as encryption_types
+    by _time TargetUserName TargetDomainName IpAddress
+| where distinct_services >= 2 OR ticket_requests >= 5
+| sort - ticket_requests

@@ -1,0 +1,19 @@
+index=windows sourcetype="XmlWinEventLog:Security"
+| rex field=_raw "<EventID>(?<EventCode>\d+)</EventID>"
+| rex field=_raw "<Data Name='TargetUserName'>(?<TargetUserName>[^<]*)</Data>"
+| rex field=_raw "<Data Name='TargetDomainName'>(?<TargetDomainName>[^<]*)</Data>"
+| rex field=_raw "<Data Name='LogonType'>(?<LogonType>[^<]*)</Data>"
+| rex field=_raw "<Data Name='IpAddress'>(?<IpAddress>[^<]*)</Data>"
+| rex field=_raw "<Data Name='AuthenticationPackageName'>(?<AuthenticationPackageName>[^<]*)</Data>"
+| where EventCode="4624" AND LogonType="10"
+| where match(TargetUserName, "(?i)^svc[_-]")
+| where IpAddress != "192.168.100.30"
+| table
+    _time
+    host
+    TargetDomainName
+    TargetUserName
+    IpAddress
+    LogonType
+    AuthenticationPackageName
+| sort - _time

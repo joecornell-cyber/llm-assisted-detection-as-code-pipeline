@@ -1,0 +1,16 @@
+index=windows sourcetype="XmlWinEventLog:Security"
+| rex field=_raw "<EventID>(?<EventCode>\d+)</EventID>"
+| rex field=_raw "<Data Name='SourceAddress'>(?<SourceAddress>[^<]*)</Data>"
+| rex field=_raw "<Data Name='DestAddress'>(?<DestAddress>[^<]*)</Data>"
+| rex field=_raw "<Data Name='DestPort'>(?<DestPort>[^<]*)</Data>"
+| where EventCode IN ("5152","5156","5157")
+| where SourceAddress!="-" AND DestAddress!="-" AND DestPort!="-"
+| bin _time span=5m
+| stats
+    count as event_count
+    dc(DestPort) as distinct_destination_ports
+    values(DestPort) as destination_ports
+    values(EventCode) as event_codes
+    by _time SourceAddress DestAddress
+| where event_count >= 100 AND distinct_destination_ports >= 3
+| sort - event_count
